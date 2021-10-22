@@ -203,8 +203,8 @@ object Differ {
 
   def fail[A]: Differ[A] = (_: A, _: A) => Diff.NotComparable
 
-  def record(structure: Chunk[Schema.Field[_]]): Differ[ListMap[String, _]] =
-    (thisValue: ListMap[String, _], thatValue: ListMap[String, _]) =>
+  def record(structure: Chunk[Schema.Field[?]]): Differ[ListMap[String, ?]] =
+    (thisValue: ListMap[String, ?], thatValue: ListMap[String, ?]) =>
       if (!(conformsToStructure(thisValue, structure) && conformsToStructure(thatValue, structure)))
         Diff.NotComparable
       else
@@ -219,13 +219,13 @@ object Differ {
           )
           .orIdentical
 
-  private def conformsToStructure(map: ListMap[String, _], structure: Chunk[Schema.Field[_]]): Boolean =
+  private def conformsToStructure(map: ListMap[String, ?], structure: Chunk[Schema.Field[?]]): Boolean =
     structure.foldRight(true) {
       case (_, false)                  => false
       case (field: Schema.Field[a], _) => map.get(field.label).map(_.isInstanceOf[a]).getOrElse(false)
     }
 
-  def enum[Z](cases: Schema.Case[_, Z]*): Differ[Z] =
+  def enum[Z](cases: Schema.Case[?, Z]*): Differ[Z] =
     (thisZ: Z, thatZ: Z) =>
       cases
         .foldRight[Option[Diff]](None) {
@@ -239,8 +239,8 @@ object Differ {
         }
         .getOrElse(Diff.NotComparable)
 
-  def enumeration(structure: ListMap[String, Schema[_]]): Differ[(String, _)] =
-    instancePartial[(String, _)] {
+  def enumeration(structure: ListMap[String, Schema[?]]): Differ[(String, ?)] =
+    instancePartial[(String, ?)] {
       case ((thisKey, thisValue), (thatKey, thatValue)) if thisKey == thatKey =>
         structure
           .get(thisKey)

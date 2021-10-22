@@ -40,7 +40,7 @@ object Migration {
 
   final case class Require(override val path: NodePath) extends Migration
 
-  final case class ChangeType(override val path: NodePath, value: StandardType[_]) extends Migration
+  final case class ChangeType(override val path: NodePath, value: StandardType[?]) extends Migration
 
   final case class AddNode(override val path: NodePath, node: SchemaAst) extends Migration
 

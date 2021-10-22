@@ -7,7 +7,7 @@ import magnolia._
 
 import zio.Chunk
 
-object DeriveSchema {
+trait DeriveSchema {
 
   type Typeclass[A] = Schema[A]
 
@@ -1341,3 +1341,5 @@ object DeriveSchema {
   implicit def gen[T]: Schema[T] = macro Magnolia.gen[T]
 
 }
+
+object DeriveSchema extends DeriveSchema

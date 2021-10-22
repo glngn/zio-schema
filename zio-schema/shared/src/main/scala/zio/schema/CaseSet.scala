@@ -17,9 +17,9 @@ sealed trait CaseSet {
 
   def ++[That <: CaseSet.Aux[EnumType]](that: That): Append[That]
 
-  def toMap: ListMap[String, Schema[_]]
+  def toMap: ListMap[String, Schema[?]]
 
-  def toSeq: Seq[Case[_, EnumType]]
+  def toSeq: Seq[Case[?, EnumType]]
 
   def makeAccessors(whole: Enum[EnumType], b: AccessorBuilder): Accessors[EnumType, b.Lens, b.Prism, b.Traversal]
 
@@ -38,9 +38,9 @@ object CaseSet {
 
     override def ++[That <: CaseSet.Aux[EnumType]](that: That): Append[That] = that
 
-    override def toMap: ListMap[String, Schema[_]] = ListMap.empty
+    override def toMap: ListMap[String, Schema[?]] = ListMap.empty
 
-    override def toSeq: Seq[Case[_, Z]] = Seq.empty
+    override def toSeq: Seq[Case[?, Z]] = Seq.empty
 
     override def makeAccessors(
       whole: Enum[EnumType],
@@ -66,9 +66,9 @@ object CaseSet {
 
     override def ++[That <: CaseSet.Aux[EnumType]](that: That): Append[That] = Cons(head, tail ++ that)
 
-    override def toMap: ListMap[String, Schema[_]] = ListMap(head.id -> head.codec) ++ tail.toMap
+    override def toMap: ListMap[String, Schema[?]] = ListMap(head.id -> head.codec) ++ tail.toMap
 
-    override def toSeq: Seq[Case[_, Z]] =
+    override def toSeq: Seq[Case[?, Z]] =
       Seq(head) ++ tail.toSeq
 
     override def makeAccessors(

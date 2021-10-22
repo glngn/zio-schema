@@ -10,7 +10,7 @@ sealed trait SchemaAst { self =>
   def optional: Boolean
   def dimensions: Int
 
-  def toSchema: Schema[_] = SchemaAst.materialize(self)
+  def toSchema: Schema[?] = SchemaAst.materialize(self)
 
   override def toString: String = AstRenderer.render(self)
 }
@@ -95,7 +95,7 @@ object SchemaAst {
     )
   }
   final case class Value(
-    valueType: StandardType[_],
+    valueType: StandardType[?],
     override val path: NodePath = NodePath.root,
     override val optional: Boolean = false,
     override val dimensions: Int = 0
@@ -161,7 +161,7 @@ object SchemaAst {
   ) { self =>
     private val children: ChunkBuilder[Labelled] = ChunkBuilder.make[Labelled]()
 
-    def addLabelledSubtree(label: String, schema: Schema[_]): NodeBuilder = {
+    def addLabelledSubtree(label: String, schema: Schema[?]): NodeBuilder = {
       children += (label -> subtree(path / label, lineage, schema))
       self
     }
@@ -209,7 +209,7 @@ object SchemaAst {
   private[schema] def subtree(
     path: NodePath,
     lineage: Lineage,
-    schema: Schema[_],
+    schema: Schema[?],
     optional: Boolean = false,
     dimensions: Int = 0
   ): SchemaAst =
@@ -255,7 +255,7 @@ object SchemaAst {
         }
       }
 
-  private[schema] def materialize(ast: SchemaAst, refs: Map[NodePath, SchemaAst] = Map.empty): Schema[_] = {
+  private[schema] def materialize(ast: SchemaAst, refs: Map[NodePath, SchemaAst] = Map.empty): Schema[?] = {
     val baseSchema = ast match {
       case SchemaAst.Value(typ, _, _, _) =>
         Schema.Primitive(typ)
@@ -291,9 +291,9 @@ object SchemaAst {
       case (false, 0) => baseSchema
       case (true, 0)  => baseSchema.optional
       case (false, n) =>
-        (0 until n).foldRight[Schema[_]](baseSchema)((_, schema) => schema.repeated)
+        (0 until n).foldRight[Schema[?]](baseSchema)((_, schema) => schema.repeated)
       case (true, n) =>
-        (0 until n).foldRight[Schema[_]](baseSchema)((_, schema) => schema.repeated).optional
+        (0 until n).foldRight[Schema[?]](baseSchema)((_, schema) => schema.repeated).optional
     }
   }
 

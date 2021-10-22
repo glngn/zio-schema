@@ -45,7 +45,7 @@ object StandardType {
     final val UUID             = "uuid"
   }
 
-  def fromString(tag: String): Option[StandardType[_]] =
+  def fromString(tag: String): Option[StandardType[?]] =
     tag match {
       case Tags.UNIT             => Some(UnitType)
       case Tags.STRING           => Some(StringType)

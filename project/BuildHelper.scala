@@ -26,7 +26,7 @@ object BuildHelper {
     val stdCompileOnlyDeps = Seq(
       ("com.github.ghik" % "silencer-lib" % silencerVersion % Provided).cross(CrossVersion.full),
       compilerPlugin(("com.github.ghik" % "silencer-plugin" % silencerVersion).cross(CrossVersion.full)),
-      compilerPlugin(("org.typelevel"   %% "kind-projector" % "0.11.0").cross(CrossVersion.full))
+      compilerPlugin(("org.typelevel"   %% "kind-projector" % "0.13.2").cross(CrossVersion.full))
     )
     CrossVersion.partialVersion(scalaVersion) match {
       case Some((2, x)) if x <= 12 =>
@@ -49,7 +49,6 @@ object BuildHelper {
       "-language:existentials",
       "-explaintypes",
       "-Yrangepos",
-      "-Xsource:2.13",
       "-Xlint:_,-type-parameter-shadow",
       "-Ywarn-numeric-widen",
       "-Ywarn-value-discard",
@@ -86,8 +85,16 @@ object BuildHelper {
         ) ++ optimizerOptions
       case _ => Seq.empty
     }
+    val typeLambdaOptions = {
+      val Some(underscoreTypeLambdas) = CrossVersion.partialVersion(scalaVersion) map {
+        case (3, _) => Seq("-Ykind-projector:underscores")
+        case (2, 13) | (2, 12) => Seq("-Xsource:3", "-P:kind-projector:underscore-placeholders")
+        case v => sys.error(s"unsupported Scala version $v")
+      }
+      underscoreTypeLambdas
+    }
 
-    stdOptions ++ extraOptions
+    stdOptions ++ extraOptions ++ typeLambdaOptions
   }
 
   def platformSpecificSources(platform: String, conf: String, baseDirectory: File)(versions: String*) =

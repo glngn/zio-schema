@@ -11,7 +11,7 @@ sealed trait FieldSet {
 
   def ++[That <: FieldSet](that: That): Append[That]
 
-  def toChunk: Chunk[Field[_]]
+  def toChunk: Chunk[Field[?]]
 
   def makeAccessors[Whole](whole: Record[Whole], b: AccessorBuilder): Accessors[Whole, b.Lens, b.Prism, b.Traversal]
 
@@ -31,7 +31,7 @@ object FieldSet {
 
     override def ++[That <: FieldSet](that: That): Append[That] = that
 
-    override def toChunk: Chunk[Field[_]] = Chunk.empty
+    override def toChunk: Chunk[Field[?]] = Chunk.empty
 
     override def makeAccessors[Whole](
       whole: Record[Whole],
@@ -50,7 +50,7 @@ object FieldSet {
 
     override def ++[That <: FieldSet](that: That): Append[That] = Cons(head, tail ++ that)
 
-    override def toChunk: Chunk[Field[_]] = head +: tail.toChunk
+    override def toChunk: Chunk[Field[?]] = head +: tail.toChunk
 
     override def makeAccessors[Whole](
       whole: Record[Whole],

@@ -48,14 +48,14 @@ trait DynamicValue { self =>
 
       case (DynamicValue.Sequence(values), Schema.Sequence(schema, f, _)) =>
         values
-          .foldLeft[Either[String, Chunk[_]]](Right[String, Chunk[A]](Chunk.empty)) {
+          .foldLeft[Either[String, Chunk[?]]](Right[String, Chunk[A]](Chunk.empty)) {
             case (err @ Left(_), _) => err
             case (Right(values), value) =>
               value.toTypedValue(schema).map(values :+ _)
           }
           .map(f)
 
-      case (DynamicValue.SomeValue(value), Schema.Optional(schema: Schema[_])) =>
+      case (DynamicValue.SomeValue(value), Schema.Optional(schema: Schema[?])) =>
         value.toTypedValue(schema).map(Some(_))
 
       case (DynamicValue.NoneValue, Schema.Optional(_)) =>
@@ -90,7 +90,7 @@ object DynamicValue {
       case Schema.Primitive(p) => DynamicValue.Primitive(value, p)
 
       case Schema.GenericRecord(structure) =>
-        val map: ListMap[String, _] = value
+        val map: ListMap[String, ?] = value
         DynamicValue.Record(
           ListMap.empty ++ structure.toChunk.map {
             case Schema.Field(key, schema: Schema[a], _) =>
@@ -1816,8 +1816,8 @@ object DynamicValue {
 
   def decodeStructure(
     values: ListMap[String, DynamicValue],
-    structure: Chunk[Schema.Field[_]]
-  ): Either[String, ListMap[String, _]] = {
+    structure: Chunk[Schema.Field[?]]
+  ): Either[String, ListMap[String, ?]] = {
     val keys = values.keySet
     keys.foldLeft[Either[String, ListMap[String, Any]]](Right(ListMap.empty)) {
       case (Right(record), key) =>
