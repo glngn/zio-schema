@@ -258,7 +258,7 @@ object DeriveSchema {
 
           q"""zio.schema.Schema.record(..$fields).transformOrFail[$tpe]($fromMap,$toMap)"""
         } else {
-          val schemaType = arity match {
+          val schemaConstructor = arity match {
             case 1  => q"zio.schema.Schema.CaseClass1[..$typeArgs]"
             case 2  => q"zio.schema.Schema.CaseClass2[..$typeArgs]"
             case 3  => q"zio.schema.Schema.CaseClass3[..$typeArgs]"
@@ -324,51 +324,37 @@ object DeriveSchema {
             else
               Iterable(q"annotations = zio.Chunk.apply(..$typeAnnotations)") ++ fieldDefs ++ Iterable(constructExpr) ++ extractors
 
+          def out(outType: Tree): Tree =
+            q"""
+             {
+               def ${selfRef.name.toTermName}: $outType = $schemaConstructor(..$applyArgs);
+               $selfRef
+             }
+             """
+
           fieldTypes.size match {
-            case 1 =>
-              q"{lazy val $selfRef: zio.schema.Schema.CaseClass1[..$typeArgs] = $schemaType(..$applyArgs); $selfRef}"
-            case 2 =>
-              q"{lazy val $selfRef: zio.schema.Schema.CaseClass2[..$typeArgs] = $schemaType(..$applyArgs); $selfRef}"
-            case 3 =>
-              q"{lazy val $selfRef: zio.schema.Schema.CaseClass3[..$typeArgs] = $schemaType(..$applyArgs); $selfRef}"
-            case 4 =>
-              q"{lazy val $selfRef: zio.schema.Schema.CaseClass4[..$typeArgs] = $schemaType(..$applyArgs); $selfRef}"
-            case 5 =>
-              q"{lazy val $selfRef: zio.schema.Schema.CaseClass5[..$typeArgs] = $schemaType(..$applyArgs); $selfRef}"
-            case 6 =>
-              q"{lazy val $selfRef: zio.schema.Schema.CaseClass6[..$typeArgs] = $schemaType(..$applyArgs); $selfRef}"
-            case 7 =>
-              q"{lazy val $selfRef: zio.schema.Schema.CaseClass7[..$typeArgs] = $schemaType(..$applyArgs); $selfRef}"
-            case 8 =>
-              q"{lazy val $selfRef: zio.schema.Schema.CaseClass8[..$typeArgs] = $schemaType(..$applyArgs); $selfRef}"
-            case 9 =>
-              q"{lazy val $selfRef: zio.schema.Schema.CaseClass9[..$typeArgs] = $schemaType(..$applyArgs); $selfRef}"
-            case 10 =>
-              q"{lazy val $selfRef: zio.schema.Schema.CaseClass10[..$typeArgs] = $schemaType(..$applyArgs); $selfRef}"
-            case 11 =>
-              q"{lazy val $selfRef: zio.schema.Schema.CaseClass11[..$typeArgs] = $schemaType(..$applyArgs); $selfRef}"
-            case 12 =>
-              q"{lazy val $selfRef: zio.schema.Schema.CaseClass12[..$typeArgs] = $schemaType(..$applyArgs); $selfRef}"
-            case 13 =>
-              q"{lazy val $selfRef: zio.schema.Schema.CaseClass13[..$typeArgs] = $schemaType(..$applyArgs); $selfRef}"
-            case 14 =>
-              q"{lazy val $selfRef: zio.schema.Schema.CaseClass14[..$typeArgs] = $schemaType(..$applyArgs); $selfRef}"
-            case 15 =>
-              q"{lazy val $selfRef: zio.schema.Schema.CaseClass15[..$typeArgs] = $schemaType(..$applyArgs); $selfRef}"
-            case 16 =>
-              q"{lazy val $selfRef: zio.schema.Schema.CaseClass16[..$typeArgs] = $schemaType(..$applyArgs); $selfRef}"
-            case 17 =>
-              q"{lazy val $selfRef: zio.schema.Schema.CaseClass17[..$typeArgs] = $schemaType(..$applyArgs); $selfRef}"
-            case 18 =>
-              q"{lazy val $selfRef: zio.schema.Schema.CaseClass18[..$typeArgs] = $schemaType(..$applyArgs); $selfRef}"
-            case 19 =>
-              q"{lazy val $selfRef: zio.schema.Schema.CaseClass19[..$typeArgs] = $schemaType(..$applyArgs); $selfRef}"
-            case 20 =>
-              q"{lazy val $selfRef: zio.schema.Schema.CaseClass20[..$typeArgs] = $schemaType(..$applyArgs); $selfRef}"
-            case 21 =>
-              q"{lazy val $selfRef: zio.schema.Schema.CaseClass21[..$typeArgs] = $schemaType(..$applyArgs); $selfRef}"
-            case 22 =>
-              q"{lazy val $selfRef: zio.schema.Schema.CaseClass22[..$typeArgs] = $schemaType(..$applyArgs); $selfRef}"
+            case 1 => out(tq"zio.schema.Schema.CaseClass1[..$typeArgs]")
+            case 2 => out(tq"zio.schema.Schema.CaseClass2[..$typeArgs]")
+            case 3 => out(tq"zio.schema.Schema.CaseClass3[..$typeArgs]")
+            case 4 => out(tq"zio.schema.Schema.CaseClass4[..$typeArgs]")
+            case 5 => out(tq"zio.schema.Schema.CaseClass5[..$typeArgs]")
+            case 6 => out(tq"zio.schema.Schema.CaseClass6[..$typeArgs]")
+            case 7 => out(tq"zio.schema.Schema.CaseClass7[..$typeArgs]")
+            case 8 => out(tq"zio.schema.Schema.CaseClass8[..$typeArgs]")
+            case 9 => out(tq"zio.schema.Schema.CaseClass9[..$typeArgs]")
+            case 10 => out(tq"zio.schema.Schema.CaseClass10[..$typeArgs]")
+            case 11 => out(tq"zio.schema.Schema.CaseClass11[..$typeArgs]")
+            case 12 => out(tq"zio.schema.Schema.CaseClass12[..$typeArgs]")
+            case 13 => out(tq"zio.schema.Schema.CaseClass13[..$typeArgs]")
+            case 14 => out(tq"zio.schema.Schema.CaseClass14[..$typeArgs]")
+            case 15 => out(tq"zio.schema.Schema.CaseClass15[..$typeArgs]")
+            case 16 => out(tq"zio.schema.Schema.CaseClass16[..$typeArgs]")
+            case 17 => out(tq"zio.schema.Schema.CaseClass17[..$typeArgs]")
+            case 18 => out(tq"zio.schema.Schema.CaseClass18[..$typeArgs]")
+            case 19 => out(tq"zio.schema.Schema.CaseClass19[..$typeArgs]")
+            case 20 => out(tq"zio.schema.Schema.CaseClass20[..$typeArgs]")
+            case 21 => out(tq"zio.schema.Schema.CaseClass21[..$typeArgs]")
+            case 22 => out(tq"zio.schema.Schema.CaseClass22[..$typeArgs]")
             case s =>
               c.abort(
                 tpe.termSymbol.pos,
