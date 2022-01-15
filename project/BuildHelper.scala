@@ -15,11 +15,18 @@ object BuildHelper {
     import java.util.{ List => JList, Map => JMap }
     import scala.jdk.CollectionConverters._
 
-    val doc = new Load(LoadSettings.builder().build())
-      .loadFromReader(scala.io.Source.fromFile(".github/workflows/ci.yml").bufferedReader())
-    val yaml = doc.asInstanceOf[JMap[String, JMap[String, JMap[String, JMap[String, JMap[String, JList[String]]]]]]]
-    val list = yaml.get("jobs").get("build").get("strategy").get("matrix").get("scala").asScala
-    list.map(v => (v.split('.').take(2).mkString("."), v)).toMap
+    if (file(".github/workflows/ci.yml").exists) {
+      val doc = new Load(LoadSettings.builder().build())
+        .loadFromReader(scala.io.Source.fromFile(".github/workflows/ci.yml").bufferedReader())
+      val yaml = doc.asInstanceOf[JMap[String, JMap[String, JMap[String, JMap[String, JMap[String, JList[String]]]]]]]
+      val list = yaml.get("jobs").get("build").get("strategy").get("matrix").get("scala").asScala
+      list.map(v => (v.split('.').take(2).mkString("."), v)).toMap
+    } else {
+      Map(
+        "2.12" -> "2.12.15",
+        "2.13" -> "2.13.6"
+      )
+    }
   }
 
   val Scala212: String   = versions("2.12")
