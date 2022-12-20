@@ -8,27 +8,12 @@ import scalafix.sbt.ScalafixPlugin.autoImport._
 
 object BuildHelper {
 
-  private val versions: Map[String, String] = {
-    import org.snakeyaml.engine.v2.api.{ Load, LoadSettings }
+  val Scala213: String = "2.13.10"
 
-    import java.util.{ List => JList, Map => JMap }
-    import scala.jdk.CollectionConverters._
-
-    val doc = new Load(LoadSettings.builder().build())
-      .loadFromReader(scala.io.Source.fromFile(".github/workflows/ci.yml").bufferedReader())
-    val yaml = doc.asInstanceOf[JMap[String, JMap[String, JMap[String, JMap[String, JMap[String, JList[String]]]]]]]
-    val list = yaml.get("jobs").get("build").get("strategy").get("matrix").get("scala").asScala
-    list.map(v => (v.split('.').take(2).mkString("."), v)).toMap
-  }
-
-  val Scala212: String = versions("2.12")
-  val Scala213: String = versions("2.13")
-  val Scala3: String   = versions("3.1") //versions.getOrElse("3.0", versions("3.1"))
-
-  val zioVersion               = "2.0.1"
-  val zioJsonVersion           = "0.3.0-RC9"
-  val zioPreludeVersion        = "1.0.0-RC15"
-  val zioOpticsVersion         = "0.2.0"
+  val zioVersion               = "1.0.10"
+  val zioJsonVersion           = "0.2.0"
+  val zioPreludeVersion        = "1.0.0-RC8"
+  val zioOpticsVersion         = "0.1.0"
   val silencerVersion          = "1.7.11"
   val avroVersion              = "1.11.0"
   val zioConstraintlessVersion = "0.3.1"
@@ -41,8 +26,6 @@ object BuildHelper {
   def macroDefinitionSettings = Seq(
     scalacOptions += "-language:experimental.macros",
     libraryDependencies ++= {
-      if (scalaVersion.value == Scala3) Seq()
-      else
         Seq(
           "org.scala-lang" % "scala-reflect"  % scalaVersion.value % "provided",
           "org.scala-lang" % "scala-compiler" % scalaVersion.value % "provided"
@@ -135,16 +118,6 @@ object BuildHelper {
     stdOptions ++ extraOptions
   }
 
-  val dottySettings = Seq(
-    crossScalaVersions += Scala3,
-    scalacOptions --= {
-      if (scalaVersion.value == Scala3)
-        Seq("-Xfatal-warnings")
-      else
-        Seq()
-    }
-  )
-
   def platformSpecificSources(platform: String, conf: String, baseDirectory: File)(versions: String*): Seq[File] =
     for {
       platform <- List("shared", platform)
@@ -194,11 +167,11 @@ object BuildHelper {
   def stdSettings(prjName: String) =
     Seq(
       name := s"$prjName",
-      crossScalaVersions := Seq(Scala213, Scala212, Scala3),
+      crossScalaVersions := Seq(Scala213),
       ThisBuild / scalaVersion := Scala213, //crossScalaVersions.value.head, //Scala3,
       scalacOptions := compilerOptions(scalaVersion.value, optimize = !isSnapshot.value),
       libraryDependencies ++= compileOnlyDeps(scalaVersion.value) ++ testDeps,
-      ThisBuild / semanticdbEnabled := scalaVersion.value != Scala3, // enable SemanticDB,
+      ThisBuild / semanticdbEnabled := true,
       ThisBuild / semanticdbOptions += "-P:semanticdb:synthetics:on",
       ThisBuild / semanticdbVersion := scalafixSemanticdb.revision,
       ThisBuild / scalafixScalaBinaryVersion := CrossVersion.binaryScalaVersion(scalaVersion.value),
