@@ -28,6 +28,8 @@ object DeriveSchema {
 
     def isMap(tpe: Type): Boolean = tpe.typeSymbol.fullName == "scala.collection.immutable.Map"
 
+    def isSet(tpe: Type): Boolean = tpe.typeSymbol.fullName == "scala.collection.immutable.Set"
+
     def recurse(tpe: Type, stack: List[Frame[c.type]]): Tree =
       if (isCaseObject(tpe))
         q"_root_.zio.schema.Schema.singleton(${tpe.typeSymbol.asClass.module})"
@@ -35,6 +37,7 @@ object DeriveSchema {
       else if (isSealedTrait(tpe))
         deriveEnum(tpe, stack)
       else if (isMap(tpe)) deriveMap(tpe)
+      else if (isSet(tpe)) deriveSet(tpe)
       else
         c.abort(
           c.enclosingPosition,
@@ -260,7 +263,7 @@ object DeriveSchema {
             q"""(b: $tpe) => Right(scala.collection.immutable.ListMap.apply(..$tuples))"""
           }
 
-          q"""zio.schema.Schema.record(..$fields).transformOrFail[$tpe]($fromMap,$toMap)"""
+          q"""_root_.zio.schema.Schema.record(..$fields).transformOrFail[$tpe]($fromMap,$toMap)"""
         } else {
           val schemaConstructor = arity match {
             case 1  => q"_root_.zio.schema.Schema.CaseClass1[..$typeArgs]"
@@ -556,6 +559,25 @@ object DeriveSchema {
       q"""
 {
   def ${selfRefIdent.name.toTermName}: _root_.zio.schema.Schema.MapSchema[$keyType, $valueType] = _root_.zio.schema.Schema.MapSchema.apply[$keyType, $valueType]($keySchema, $valueSchema, _root_.zio.Chunk.empty)
+  $selfRefIdent
+}
+"""
+    }
+
+    def deriveSet(tpe: Type): Tree = {
+      val selfRefName  = c.freshName("ref")
+      val selfRefIdent = Ident(TermName(selfRefName))
+
+      val valueType = tpe match {
+        case TypeRef(_, _, List(valueType)) => valueType
+        case _                              => c.abort(c.enclosingPosition, (s"Invalid type $tpe for @deriveSchema"))
+      }
+
+      val valueSchema = q"""_root_.zio.schema.Schema[$valueType]"""
+
+      q"""
+{
+  def ${selfRefIdent.name.toTermName}: _root_.zio.schema.Schema.SetSchema[$valueType] = _root_.zio.schema.Schema.SetSchema.apply[$valueType]($valueSchema, _root_.zio.Chunk.empty)
   $selfRefIdent
 }
 """
