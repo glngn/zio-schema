@@ -53,24 +53,16 @@ lazy val root = project
   )
   .aggregate(
     zioSchemaJVM,
-    zioSchemaJS,
     zioSchemaDerivationJVM,
-    zioSchemaDerivationJS,
     zioSchemaJsonJVM,
-    zioSchemaJsonJS,
-    zioSchemaOpticsJS,
     zioSchemaOpticsJVM,
-    zioSchemaProtobufJS,
     zioSchemaProtobufJVM,
-    zioSchemaExamplesJS,
     zioSchemaExamplesJVM,
     testsJVM,
-    testsJS,
     zioSchemaZioTestJVM,
-    zioSchemaZioTestJS
   )
 
-lazy val tests = crossProject(JSPlatform, JVMPlatform)
+lazy val tests = crossProject(JVMPlatform)
   .in(file("tests"))
   .dependsOn(zioSchemaDerivation % "compile->test", zioSchema % "test->test", zioSchemaZioTest % "compile->test")
   .settings(stdSettings("zio-schema-tests"))
@@ -78,13 +70,10 @@ lazy val tests = crossProject(JSPlatform, JVMPlatform)
   .settings(crossProjectSettings)
   .settings(buildInfoSettings("zio.schema"))
 
-lazy val testsJS = tests.js
-  .settings(scalaJSUseMainModuleInitializer := true)
-
 lazy val testsJVM = tests.jvm
   .settings(Test / fork := true)
 
-lazy val zioSchema = crossProject(JSPlatform, JVMPlatform)
+lazy val zioSchema = crossProject(JVMPlatform)
   .in(file("zio-schema"))
   .settings(stdSettings("zio-schema"))
   .settings(crossProjectSettings)
@@ -97,13 +86,10 @@ lazy val zioSchema = crossProject(JSPlatform, JVMPlatform)
     )
   )
 
-lazy val zioSchemaJS = zioSchema.js
-  .settings(scalaJSUseMainModuleInitializer := true)
-
 lazy val zioSchemaJVM = zioSchema.jvm
   .settings(Test / fork := true)
 
-lazy val zioSchemaDerivation = crossProject(JSPlatform, JVMPlatform)
+lazy val zioSchemaDerivation = crossProject(JVMPlatform)
   .in(file("zio-schema-derivation"))
   .dependsOn(zioSchema, zioSchema, zioSchema % "test->test")
   .settings(stdSettings("zio-schema-derivation"))
@@ -128,13 +114,10 @@ lazy val zioSchemaDerivation = crossProject(JSPlatform, JVMPlatform)
     }
   )
 
-lazy val zioSchemaDerivationJS = zioSchemaDerivation.js
-  .settings(scalaJSUseMainModuleInitializer := true)
-
 lazy val zioSchemaDerivationJVM = zioSchemaDerivation.jvm
   .settings(Test / fork := true)
 
-lazy val zioSchemaJson = crossProject(JSPlatform, JVMPlatform)
+lazy val zioSchemaJson = crossProject(JVMPlatform)
   .in(file("zio-schema-json"))
   .dependsOn(zioSchema, zioSchemaDerivation, tests % "test->test")
   .settings(stdSettings("zio-schema-json"))
@@ -146,26 +129,20 @@ lazy val zioSchemaJson = crossProject(JSPlatform, JVMPlatform)
     )
   )
 
-lazy val zioSchemaJsonJS = zioSchemaJson.js
-  .settings(scalaJSUseMainModuleInitializer := true)
-
 lazy val zioSchemaJsonJVM = zioSchemaJson.jvm
   .settings(Test / fork := true)
 
-lazy val zioSchemaProtobuf = crossProject(JSPlatform, JVMPlatform)
+lazy val zioSchemaProtobuf = crossProject(JVMPlatform)
   .in(file("zio-schema-protobuf"))
   .dependsOn(zioSchema, zioSchemaDerivation, tests % "test->test")
   .settings(stdSettings("zio-schema-protobuf"))
   .settings(crossProjectSettings)
   .settings(buildInfoSettings("zio.schema.protobuf"))
 
-lazy val zioSchemaProtobufJS = zioSchemaProtobuf.js
-  .settings(scalaJSUseMainModuleInitializer := true)
-
 lazy val zioSchemaProtobufJVM = zioSchemaProtobuf.jvm
   .settings(Test / fork := true)
 
-lazy val zioSchemaOptics = crossProject(JSPlatform, JVMPlatform)
+lazy val zioSchemaOptics = crossProject(JVMPlatform)
   .in(file("zio-schema-optics"))
   .dependsOn(zioSchema, zioSchemaDerivation, tests % "test->test")
   .settings(stdSettings("zio-schema-optics"))
@@ -177,13 +154,10 @@ lazy val zioSchemaOptics = crossProject(JSPlatform, JVMPlatform)
     )
   )
 
-lazy val zioSchemaOpticsJS = zioSchemaOptics.js
-  .settings(scalaJSUseMainModuleInitializer := true)
-
 lazy val zioSchemaOpticsJVM = zioSchemaOptics.jvm
   .settings(Test / fork := true)
 
-lazy val zioSchemaExamples = crossProject(JSPlatform, JVMPlatform)
+lazy val zioSchemaExamples = crossProject(JVMPlatform)
   .in(file("zio-schema-examples"))
   .settings(stdSettings("zio-schema-examples"))
   .settings(crossScalaVersions -= Scala212)
@@ -195,12 +169,9 @@ lazy val zioSchemaExamples = crossProject(JSPlatform, JVMPlatform)
     scalacOptions -= "-Xfatal-warnings"
   )
 
-lazy val zioSchemaExamplesJS = zioSchemaExamples.js
-  .settings(scalaJSUseMainModuleInitializer := true)
-
 lazy val zioSchemaExamplesJVM = zioSchemaExamples.jvm
 
-lazy val zioSchemaZioTest = crossProject(JSPlatform, JVMPlatform)
+lazy val zioSchemaZioTest = crossProject(JVMPlatform)
   .in(file("zio-schema-zio-test"))
   .dependsOn(zioSchema, zioSchemaDerivation)
   .settings(stdSettings("zio-schema-zio-test"))
@@ -211,9 +182,6 @@ lazy val zioSchemaZioTest = crossProject(JSPlatform, JVMPlatform)
       "dev.zio" %% "zio-test" % zioVersion
     )
   )
-
-lazy val zioSchemaZioTestJS = zioSchemaZioTest.js
-  .settings(scalaJSUseMainModuleInitializer := true)
 
 lazy val zioSchemaZioTestJVM = zioSchemaZioTest.jvm
   .settings(Test / fork := true)
