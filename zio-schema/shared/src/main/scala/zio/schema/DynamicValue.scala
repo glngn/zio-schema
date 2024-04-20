@@ -31,7 +31,7 @@ sealed trait DynamicValue { self =>
 
       case (DynamicValue.Enumeration((key, value)), s: Schema.Enum[A]) =>
         s.structure.get(key) match {
-          case Some(schema) => value.toTypedValue(schema).asInstanceOf[Either[String, A]]
+          case Some(schm) => value.toTypedValue(schm).asInstanceOf[Either[String, A]]
           case None         => Left(s"Failed to find case $key in enumN $s")
         }
 
